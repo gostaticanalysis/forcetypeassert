@@ -7,7 +7,7 @@
 ```go
 func f() {
 	var a interface{}
-	_ = a.(int) // must not do fource type assertion
+	_ = a.(int) // type assertion must be checked
 }
 ```
 
