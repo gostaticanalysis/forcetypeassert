@@ -1,4 +1,4 @@
-package fourcetypeassert
+package forcetypeassert
 
 import (
 	"go/ast"
@@ -9,7 +9,7 @@ import (
 )
 
 var Analyzer = &analysis.Analyzer{
-	Name: "fourcetypeassert",
+	Name: "forcetypeassert",
 	Doc:  Doc,
 	Run:  run,
 	Requires: []*analysis.Analyzer{
@@ -17,7 +17,7 @@ var Analyzer = &analysis.Analyzer{
 	},
 }
 
-const Doc = "fourcetypeassert is ..."
+const Doc = "forcetypeassert is finds type assertions which did forcely such as below."
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)

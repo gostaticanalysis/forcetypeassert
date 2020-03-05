@@ -1,8 +1,8 @@
-# fourcetypeassert
+# forcetypeassert
 
 [![godoc.org][godoc-badge]][godoc]
 
-`fourcetypeassert` finds type assertions which did forcely such as below.
+`forcetypeassert` finds type assertions which did forcely such as below.
 
 ```go
 func f() {
@@ -12,6 +12,6 @@ func f() {
 ```
 
 <!-- links -->
-[godoc]: https://godoc.org/github.com/gostaticanalysis/fourcetypeassert
+[godoc]: https://godoc.org/github.com/gostaticanalysis/forcetypeassert
 [godoc-badge]: https://img.shields.io/badge/godoc-reference-4F73B3.svg?style=flat-square&label=%20godoc.org
 

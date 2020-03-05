@@ -1,4 +1,4 @@
-module github.com/gostaticanalysis/fourcetypeassert
+module github.com/gostaticanalysis/forcetypeassert
 
 go 1.12
 
