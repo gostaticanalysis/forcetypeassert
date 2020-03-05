@@ -28,4 +28,4 @@ jobs:
             cd ${{ github.workspace }}
             pwd
             git diff
-            reviewdog -reporter=github-pr-check
+            reviewdog -diff="git diff origin/master" -reporter=github-pr-check
