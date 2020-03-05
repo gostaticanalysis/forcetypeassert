@@ -17,7 +17,7 @@ var Analyzer = &analysis.Analyzer{
 	},
 }
 
-const Doc = "forcetypeassert is finds type assertions which did forcely such as below."
+const Doc = "forcetypeassert is finds type assertions which did forcely such as below"
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
