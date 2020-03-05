@@ -25,7 +25,4 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            cd ${{ github.workspace }}
-            pwd
-            git diff
-            reviewdog -diff="git diff origin/master" -reporter=github-pr-check
+            reviewdog -reporter=github-pr-review
