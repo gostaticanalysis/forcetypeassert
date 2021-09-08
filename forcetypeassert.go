@@ -25,83 +25,89 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	nodeFilter := []ast.Node{
 		(*ast.AssignStmt)(nil),
 		(*ast.ValueSpec)(nil),
+		(*ast.TypeAssertExpr)(nil),
 	}
 
-	inspect.Preorder(nodeFilter, func(n ast.Node) {
+	inspect.Nodes(nodeFilter, func(n ast.Node, push bool) bool {
+		if !push {
+			return false
+		}
 		switch n := n.(type) {
 		case *ast.AssignStmt:
-			checkAssignStmt(pass, n)
+			return checkAssignStmt(pass, n)
 		case *ast.ValueSpec:
-			checkValueSpec(pass, n)
+			return checkValueSpec(pass, n)
+		case *ast.TypeAssertExpr:
+			if n.Type != nil {
+				pass.Reportf(n.Pos(), "type assertion must be checked")
+			}
+			return false
 		}
+
+		return true
 	})
 
 	return nil, nil
 }
 
-func checkAssignStmt(pass *analysis.Pass, n *ast.AssignStmt) {
-	if !hasTypeAssertion(n.Rhs) {
-		return
+func checkAssignStmt(pass *analysis.Pass, n *ast.AssignStmt) bool {
+	tae := findTypeAssertion(n.Rhs)
+	if tae == nil {
+		return true
 	}
 
+	switch {
 	// if right hand has 2 or more values, assign statement can't assert boolean value which describes type assertion is succeeded
-	if len(n.Rhs) > 1 {
+	case len(n.Rhs) > 1 :
 		pass.Reportf(n.Pos(), "right hand must be only type assertion")
-		return
+		return false
+	case len(n.Lhs) != 2 && tae.Type != nil:
+		pass.Reportf(n.Pos(), "type assertion must be checked")
+		return false
+	case len(n.Lhs) == 2:
+		return false
 	}
 
-	if len(n.Lhs) == 2 {
-		return
-	}
-
-	tae, ok := n.Rhs[0].(*ast.TypeAssertExpr)
-	if !ok {
-		pass.Reportf(n.Pos(), "right hand is not TypeAssertion")
-		return
-	}
-
-	if tae.Type == nil {
-		return
-	}
-
-	pass.Reportf(n.Pos(), "type assertion must be checked")
+	return true
 }
 
-func checkValueSpec(pass *analysis.Pass, n *ast.ValueSpec) {
-	if !hasTypeAssertion(n.Values) {
-		return
+func checkValueSpec(pass *analysis.Pass, n *ast.ValueSpec) bool {
+	tae := findTypeAssertion(n.Values)
+	if tae == nil {
+		return true
 	}
 
+	switch {
 	// if right hand has 2 or more values, assign statement can't assert boolean value which describes type assertion is succeeded
-	if len(n.Values) > 1 {
+	case len(n.Values) > 1 :
 		pass.Reportf(n.Pos(), "right hand must be only type assertion")
-		return
+		return false
+	case len(n.Names) != 2 && tae.Type != nil:
+		pass.Reportf(n.Pos(), "type assertion must be checked")
+		return false
+	case len(n.Names) == 2:
+		return false
 	}
 
-	if len(n.Names) == 2 {
-		return
-	}
-
-	tae, ok := n.Values[0].(*ast.TypeAssertExpr)
-	if !ok {
-		pass.Reportf(n.Pos(), "right hand is not TypeAssertion")
-		return
-	}
-
-	if tae.Type == nil {
-		return
-	}
-
-	pass.Reportf(n.Pos(), "type assertion must be checked")
-
+	return true
 }
 
-func hasTypeAssertion(exprs []ast.Expr) bool {
-	for _, node := range exprs {
-		_, ok := node.(*ast.TypeAssertExpr)
-		if ok {
+func findTypeAssertion(exprs []ast.Expr) *ast.TypeAssertExpr {
+	for _, expr := range exprs {
+		var typeAssertExpr *ast.TypeAssertExpr
+		ast.Inspect(expr, func(n ast.Node) bool {
+			switch n := n.(type) {
+			case *ast.FuncLit:
+				return false
+			case *ast.TypeAssertExpr:
+				typeAssertExpr = n
+				return false
+			}
 			return true
+		})
+		if typeAssertExpr != nil {
+			return typeAssertExpr
 		}
 	}
-	return false
+	return nil
 }

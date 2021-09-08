@@ -30,4 +30,18 @@ func f() {
 	}
 
 	var _ = i.(string) // want `type assertion must be checked`
+
+	var _ = *i.(*string) // want `type assertion must be checked`
+
+	println(i.(string))   // want `type assertion must be checked`
+	println(*i.(*string)) // want `type assertion must be checked`
+
+	_ = func() int {
+		println(*i.(*string)) // want `type assertion must be checked`
+		return 0
+	}()
+
+	func() {
+		println(*i.(*string)) // want `type assertion must be checked`
+	}()
 }
