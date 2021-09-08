@@ -2,6 +2,7 @@ package forcetypeassert
 
 import (
 	"go/ast"
+	"reflect"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -15,12 +16,35 @@ var Analyzer = &analysis.Analyzer{
 	Requires: []*analysis.Analyzer{
 		inspect.Analyzer,
 	},
+	ResultType: reflect.TypeOf((*Panicable)(nil)),
 }
 
-const Doc = "forcetypeassert is finds type assertions which did forcely such as below."
+// Panicable stores panicable type assertions.
+type Panicable struct {
+	m     map[ast.Node]bool
+	nodes []ast.Node
+}
+
+// Check checks whether the node may occur panic or not.
+func (p *Panicable) Check(n ast.Node) bool {
+	return p.m[n]
+}
+
+// Len is number of panicable nodes.
+func (p *Panicable) Len() int {
+	return len(p.nodes)
+}
+
+// At returns the i-th panicable node.
+func (p *Panicable) At(i int) ast.Node {
+	return p.nodes[i]
+}
+
+const Doc = "forcetypeassert is finds type assertions which did forcely"
 
 func run(pass *analysis.Pass) (interface{}, error) {
-	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	inspect, _ := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	result := &Panicable{m: make(map[ast.Node]bool)}
 
 	nodeFilter := []ast.Node{
 		(*ast.AssignStmt)(nil),
@@ -34,11 +58,13 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		}
 		switch n := n.(type) {
 		case *ast.AssignStmt:
-			return checkAssignStmt(pass, n)
+			return checkAssignStmt(pass, result, n)
 		case *ast.ValueSpec:
-			return checkValueSpec(pass, n)
+			return checkValueSpec(pass, result, n)
 		case *ast.TypeAssertExpr:
 			if n.Type != nil {
+				result.m[n] = true
+				result.nodes = append(result.nodes, n)
 				pass.Reportf(n.Pos(), "type assertion must be checked")
 			}
 			return false
@@ -47,10 +73,10 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		return true
 	})
 
-	return nil, nil
+	return result, nil
 }
 
-func checkAssignStmt(pass *analysis.Pass, n *ast.AssignStmt) bool {
+func checkAssignStmt(pass *analysis.Pass, result *Panicable, n *ast.AssignStmt) bool {
 	tae := findTypeAssertion(n.Rhs)
 	if tae == nil {
 		return true
@@ -62,6 +88,8 @@ func checkAssignStmt(pass *analysis.Pass, n *ast.AssignStmt) bool {
 		pass.Reportf(n.Pos(), "right hand must be only type assertion")
 		return false
 	case len(n.Lhs) != 2 && tae.Type != nil:
+		result.m[n] = true
+		result.nodes = append(result.nodes, n)
 		pass.Reportf(n.Pos(), "type assertion must be checked")
 		return false
 	case len(n.Lhs) == 2:
@@ -71,7 +99,7 @@ func checkAssignStmt(pass *analysis.Pass, n *ast.AssignStmt) bool {
 	return true
 }
 
-func checkValueSpec(pass *analysis.Pass, n *ast.ValueSpec) bool {
+func checkValueSpec(pass *analysis.Pass, result *Panicable, n *ast.ValueSpec) bool {
 	tae := findTypeAssertion(n.Values)
 	if tae == nil {
 		return true
@@ -83,6 +111,8 @@ func checkValueSpec(pass *analysis.Pass, n *ast.ValueSpec) bool {
 		pass.Reportf(n.Pos(), "right hand must be only type assertion")
 		return false
 	case len(n.Names) != 2 && tae.Type != nil:
+		result.m[n] = true
+		result.nodes = append(result.nodes, n)
 		pass.Reportf(n.Pos(), "type assertion must be checked")
 		return false
 	case len(n.Names) == 2:
