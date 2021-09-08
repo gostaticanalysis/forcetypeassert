@@ -43,7 +43,7 @@ func (p *Panicable) At(i int) ast.Node {
 const Doc = "forcetypeassert is finds type assertions which did forcely"
 
 func run(pass *analysis.Pass) (interface{}, error) {
-	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	inspect, _ := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	result := &Panicable{m: make(map[ast.Node]bool)}
 
 	nodeFilter := []ast.Node{

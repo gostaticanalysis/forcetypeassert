@@ -22,7 +22,7 @@ func TestResult(t *testing.T) {
 			forcetypeassert.Analyzer,
 		},
 		Run: func(pass *analysis.Pass) (interface{}, error) {
-			panicable := pass.ResultOf[forcetypeassert.Analyzer].(*forcetypeassert.Panicable)
+			panicable, _ := pass.ResultOf[forcetypeassert.Analyzer].(*forcetypeassert.Panicable)
 			for i := 0; i < panicable.Len(); i++ {
 				n := panicable.At(i)
 				pass.Reportf(n.Pos(), "panicable")
