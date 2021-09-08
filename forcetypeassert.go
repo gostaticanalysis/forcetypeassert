@@ -58,7 +58,7 @@ func checkAssignStmt(pass *analysis.Pass, n *ast.AssignStmt) bool {
 
 	switch {
 	// if right hand has 2 or more values, assign statement can't assert boolean value which describes type assertion is succeeded
-	case len(n.Rhs) > 1 :
+	case len(n.Rhs) > 1:
 		pass.Reportf(n.Pos(), "right hand must be only type assertion")
 		return false
 	case len(n.Lhs) != 2 && tae.Type != nil:
@@ -79,7 +79,7 @@ func checkValueSpec(pass *analysis.Pass, n *ast.ValueSpec) bool {
 
 	switch {
 	// if right hand has 2 or more values, assign statement can't assert boolean value which describes type assertion is succeeded
-	case len(n.Values) > 1 :
+	case len(n.Values) > 1:
 		pass.Reportf(n.Pos(), "right hand must be only type assertion")
 		return false
 	case len(n.Names) != 2 && tae.Type != nil:
