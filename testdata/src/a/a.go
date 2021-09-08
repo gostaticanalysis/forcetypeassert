@@ -2,6 +2,10 @@ package a
 
 import "fmt"
 
+var _, _ = ((interface{})(nil)).(string)       // OK
+var _ = ((interface{})(nil)).(string)          // want `type assertion must be checked`
+var _, _ = ((interface{})(nil)).(string), true // want `right hand must be only type assertion`
+
 func f() {
 	var i interface{} = "hello"
 
@@ -24,4 +28,6 @@ func f() {
 	switch i.(type) { // ok
 	case string:
 	}
+
+	var _ = i.(string) // want `type assertion must be checked`
 }
