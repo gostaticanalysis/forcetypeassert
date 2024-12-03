@@ -23,21 +23,12 @@ jobs:
 
     steps:
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
-        go-version: 1.16.x
+        go-version: 1.23.x
 
     - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Cache Go module and build cache
-      uses: actions/cache@v2
-      with:
-        key: go-${{ hashFiles('**/go.sum') }}
-        path: |
-          ~/go/pkg/mod
-        restore-keys: |
-          go-
+      uses: actions/checkout@v4
 
     - name: Install tennvet
       run: |
