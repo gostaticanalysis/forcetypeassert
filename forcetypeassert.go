@@ -90,6 +90,11 @@ func checkAssignStmt(pass *analysis.Pass, result *Panicable, n *ast.AssignStmt) 
 	}
 
 	switch {
+
+	// if right hand is a call expression, assign statement can't assert boolean value which describes type assertion is succeeded
+	case len(n.Rhs) == 1 && isCallExpr(n.Rhs[0]):
+		pass.Reportf(n.Pos(), "right hand must be only type assertion")
+		return false
 	// if right hand has 2 or more values, assign statement can't assert boolean value which describes type assertion is succeeded
 	case len(n.Rhs) > 1:
 		pass.Reportf(n.Pos(), "right hand must be only type assertion")
@@ -113,6 +118,10 @@ func checkValueSpec(pass *analysis.Pass, result *Panicable, n *ast.ValueSpec) bo
 	}
 
 	switch {
+	// if right hand is a call expression, assign statement can't assert boolean value which describes type assertion is succeeded
+	case len(n.Values) == 1 && isCallExpr(n.Values[0]):
+		pass.Reportf(n.Pos(), "right hand must be only type assertion")
+		return false
 	// if right hand has 2 or more values, assign statement can't assert boolean value which describes type assertion is succeeded
 	case len(n.Values) > 1:
 		pass.Reportf(n.Pos(), "right hand must be only type assertion")
@@ -147,4 +156,9 @@ func findTypeAssertion(exprs []ast.Expr) *ast.TypeAssertExpr {
 		}
 	}
 	return nil
+}
+
+func isCallExpr(expr ast.Expr) bool {
+	_, isCallExpr := expr.(*ast.CallExpr)
+	return isCallExpr
 }
