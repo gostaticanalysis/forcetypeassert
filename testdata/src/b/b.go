@@ -2,12 +2,12 @@ package b
 
 import "fmt"
 
-var _, _ = ((interface{})(nil)).(string)       // OK
-var _ = ((interface{})(nil)).(string)          // want `panicable`
-var _, _ = ((interface{})(nil)).(string), true // OK
+var _, _ = any(nil).(string)       // OK
+var _ = any(nil).(string)          // want `panicable`
+var _, _ = any(nil).(string), true // OK
 
 func f() {
-	var i interface{} = "hello"
+	var i any = "hello"
 
 	_ = i.(string) // want `panicable`
 
