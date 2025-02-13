@@ -10,7 +10,7 @@ import (
 
 func Test(t *testing.T) {
 	testdata := analysistest.TestData()
-	analysistest.Run(t, testdata, forcetypeassert.Analyzer, "a")
+	analysistest.Run(t, testdata, forcetypeassert.Analyzer, "a", "issue")
 }
 
 func TestResult(t *testing.T) {
