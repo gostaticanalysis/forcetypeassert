@@ -2,12 +2,13 @@ package a
 
 import "fmt"
 
-var _, _ = ((interface{})(nil)).(string)       // OK
-var _ = ((interface{})(nil)).(string)          // want `type assertion must be checked`
-var _, _ = ((interface{})(nil)).(string), true // want `right hand must be only type assertion`
+var _, _ = any(nil).(string)       // OK
+var _ = any(nil).(any)             // OK for issue#17
+var _ = any(nil).(string)          // want `type assertion must be checked`
+var _, _ = any(nil).(string), true // want `right hand must be only type assertion`
 
 func f() {
-	var i interface{} = "hello"
+	var i any = "hello"
 
 	_ = i.(string) // want `type assertion must be checked`
 
